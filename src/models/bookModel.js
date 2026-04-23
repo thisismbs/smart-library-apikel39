@@ -1,7 +1,7 @@
 import { pool } from '../config/db.js'; 
 export const BookModel = { 
   
-async getAll(title = '') { 
+async getAll(keyword = '') { 
     let query = ` 
       SELECT b.*, a.name as author_name, c.name as category_name  
       FROM books b 
@@ -9,13 +9,17 @@ async getAll(title = '') {
       LEFT JOIN categories c ON b.category_id = c.id 
     `; 
     let params = [];
-    if (title) {
-      query += ` WHERE b.title ILIKE $1`;
-      params.push(`%${title}%`);
+    if (keyword) {
+      query += ` 
+        WHERE b.title ILIKE $1 
+        OR a.name ILIKE $1 
+        OR c.name ILIKE $1
+      `;
+      params.push(`%${keyword}%`);
     }
     const result = await pool.query(query, params); 
     return result.rows; 
-  }, 
+  },
 
   // fungsi untuk mengambil buku berdasarkan ID spesifik
   async getById(id) {
